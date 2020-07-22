@@ -1,0 +1,112 @@
+[
+  {
+    "__comment__": "We decided to split Philippines data processing into 2 steps because although the raw data files have similar structures, they have different number of rows to skip (skiprows) in the beginning.",
+    "__comment__": "It does not seem like it is worth it to split into two config files just because of this ONE difference. But we did it because if we combine both steps in one config file, we will have to use a function to load another file (because transform module only allows us to load ONE file as a base file in the beginning.",
+    "__comment__": "We want to prevent people forgetting to update the name of the new raw file to load every month. So we split these steps into two.",
+
+    "__comment__": "If we pass None for 'sheet_name' parameter in reading Excel files, pandas will read ALL the sheets.",
+    "__comment__": "The equivalent of None in JSON file is null. That's why we are providing null below to read all the sheets in the file.",
+    "input_sheet_name": 0,
+    "header": 0,
+    "skiprows": 1,
+    "skipfooter": 0,
+
+    "write_output": true,
+    "output_folder_path": "./output/APAC_Philippines/",
+    "output_file_name_prefix": "Transformed_Philippines_INV_20200501_20200531_",
+
+    "custom_transform_functions_file": "./transform_functions/apac_philippines_transform_functions.py",
+
+    "functions_to_apply": [
+      {
+        "__function_comment__": "Excel file has empty columns. We need to drop them first",
+        "function_name": "drop_unnamed_columns"
+      },
+      {
+        "__function_comment__": "By the time we run this function, there should be only 13 columns total remaining in the raw data frame.",
+        "function_name": "assert_number_of_columns_equals",
+        "function_args": [15]
+      },
+      {
+        "__function_comment__": "Add PROCESSED_DATE that holds the current date value.",
+        "function_name": "add_PROCESSED_DATE_column_with_current_date"
+      },
+      {
+        "__function_comment__": "Create HARMONIZED_YEAR column from existing date column name.",
+        "function_name": "add_HARMONIZED_YEAR_column_using_existing_column_with_year_values",
+        "function_args": ["Year"]
+      },
+      {
+        "__function_comment__": "Create HARMONIZED_MONTH column from existing date column name.",
+        "function_name": "add_HARMONIZED_MONTH_column_using_existing_column_with_month_values",
+        "function_args": ["Month"]
+      },
+      {
+        "__function_comment__": "Add DATE column based on the values in ***YEAR and MONTH columns created in previous steps***.",
+        "function_name": "add_HARMONIZED_DATE_column_using_existing_YEAR_and_MONTH_columns_with_integer_values"
+      },
+      {
+        "__function_comment__": "Add HARMONIZED_REGION as a new column with 'Asia Pacific' as value.",
+        "function_name": "add_HARMONIZED_REGION_column",
+        "function_args": ["Asia Pacific"]
+      },
+      {
+        "__function_comment__": "Create HARMONIZED_COUNTRY column (with standardized country names in comp_harm_constants.py) from raw country name column.",
+        "function_name": "add_HARMONIZED_COUNTRY_column_using_fixed_str_value",
+        "function_args": ["Philippines"]
+      },
+      {
+        "__function_comment__": "Create HARMONIZED_ADVERTISER column (with standardized advertiser names in comp_harm_constants.py) from existing raw advertiser name column.",
+        "function_name": "add_HARMONIZED_ADVERTISER_column_using_existing_advertiser_column",
+        "function_args": ["Advertiser"]
+      },
+      {
+        "__function_comment__": "Create HARMONIZED_MEDIA_TYPE column (with standardized Media Type names in comp_harm_constants.py) from raw media type column.",
+        "function_name": "add_HARMONIZED_MEDIA_TYPE_column_using_existing_media_type_column",
+        "function_args": ["Media"]
+      },
+      {
+        "__function_comment__": "Add CURRENCY as a new column with 'ZAR' as value.",
+        "function_name": "add_HARMONIZED_CURRENCY_column",
+        "function_args": ["PHP"]
+      },
+      {
+        "__function_comment__": "Create HARMONIZED_GROSS_SPEND column (with values rounded to 2-decimal places) from raw gross spend column.",
+        "function_name": "add_HARMONIZED_GROSS_SPEND_column",
+        "function_args": [["P"]]
+      },
+      {
+        "__function_comment__": "Create HARMONIZED_CATEGORY column (with standardized category names in comp_harm_constants.py) from raw category name column.",
+        "function_name": "add_HARMONIZED_CATEGORY_column_using_existing_category_column_with_country_specific_mappings",
+        "function_args": ["Section"]
+      },
+      {
+        "__function_comment__": "Create RAW_PRODUCT_NAME column from existing product name column.",
+        "function_name": "add_RAW_PRODUCT_NAME_column_by_renaming_existing_column",
+        "function_args": ["Brand"]
+      },
+      {
+        "__function_comment__": "Create RAW_SUBCATEGORY column from existing subcategory column name.",
+        "function_name": "add_RAW_SUBCATEGORY_column_by_renaming_existing_column",
+        "function_args": ["Category"]
+      },
+      {
+        "__function_comment__": "Create RAW_BRAND column from existing brand column name.",
+        "function_name": "add_RAW_BRAND_column_by_renaming_existing_column",
+        "function_args": ["Product"]
+      },
+      {
+        "__function_comment__": "Create RAW_SUBBRAND column from existing subbrand column name.",
+        "function_name": "add_RAW_SUBBRAND_column_with_empty_values"
+      },
+      {
+        "__function_comment__": "Add HARMONIZED_PRODUCT_NAME column and empty/NULL values so that automated mapping process or human mapper can fill it out later.",
+        "function_name": "add_empty_HARMONIZED_PRODUCT_NAME_column"
+      },
+      {
+        "__function_comment__": "Rearrange the columns to the desired order that we use in Competitive Harmonization.",
+        "function_name": "filter_and_rearrange_columns_for_final_output"
+      }
+    ]
+  }
+]
